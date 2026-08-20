@@ -1,0 +1,30 @@
+name: 家計簿自動取り込み
+
+on:
+  schedule:
+    # UTC時刻での指定になるので注意（15分おき）
+    - cron: "*/15 * * * *"
+  workflow_dispatch: # 手動実行ボタンも使えるようにしておく
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Pythonをセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: ライブラリをインストール
+        run: pip install -r requirements.txt
+
+      - name: スクリプトを実行
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+        run: python gmail_to_supabase_v3.py
